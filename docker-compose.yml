@@ -1,0 +1,38 @@
+version: "3"
+
+services:
+  keycloak:
+    image: bitnami/keycloak:21.1.2
+    container_name: 'keycloak'
+    depends_on:
+      - postgres
+    volumes:
+      - ./volumes/cacerts:/opt/bitnami/keycloak/certs-spi/cacerts
+      - ./volumes/keycloak:/opt/bitnami/keycloak
+    env_file:
+      - .env
+    ports:
+      - "8443:8443"
+    restart: always
+    networks:
+      lan:
+        ipv4_address: 172.26.0.11
+  postgres:
+    image: postgres:13.2
+    container_name: 'postgres-keycloak'
+    restart: always
+    volumes:
+      - ./volumes/postgresql/data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    networks:
+      lan:
+        ipv4_address: 172.26.0.12
+networks:
+  lan:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.26.0.0/24
+    driver_opts:
+      com.docker.network.bridge.name: "br-${COMPOSE_PROJECT_NAME}"
